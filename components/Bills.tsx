@@ -27,7 +27,12 @@ interface BillsProps {
   currentUser?: any
 }
 
-const Bills: React.FC<BillsProps> = ({ data, onUpdate, onDataChange, currentUser }) => {
+const Bills: React.FC<BillsProps> = ({
+  data,
+  onUpdate,
+  onDataChange,
+  currentUser,
+}) => {
   const [filter, setFilter] = useState<BillStatus | "Tudo">("Tudo")
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [loading, setLoading] = useState(false)
