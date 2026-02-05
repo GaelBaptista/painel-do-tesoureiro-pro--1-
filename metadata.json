@@ -1,0 +1,7 @@
+{
+  "name": "Painel do Tesoureiro Pro",
+  "description": "Uma plataforma completa de gestão financeira para tesouraria, com lançamentos, contas a pagar, controle de missões e relatórios automatizados.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}
