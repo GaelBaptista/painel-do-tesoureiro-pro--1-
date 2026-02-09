@@ -125,7 +125,7 @@ const Login: React.FC<LoginProps> = ({ onLogin, onToggleSignup }) => {
           <p className="text-slate-500 text-xs font-medium">
             API:{" "}
             {(import.meta as any).env.VITE_API_URL ||
-              "http://localhost:3333/api"}
+              "https://backend-tesouraria.onrender.com/api"}
           </p>
           <p className="text-slate-600 text-[10px] opacity-50 uppercase tracking-widest">
             Tesouraria Pro &copy; 2025

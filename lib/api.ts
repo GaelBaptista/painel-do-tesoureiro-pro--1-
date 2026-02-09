@@ -1,5 +1,6 @@
 const API_URL =
-  (import.meta as any).env.VITE_API_URL || "http://localhost:3333/api"
+  (import.meta as any).env.VITE_API_URL ||
+  "https://backend-tesouraria.onrender.com/api"
 
 function getToken() {
   return localStorage.getItem("tesouraria_token")
