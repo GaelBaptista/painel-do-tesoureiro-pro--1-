@@ -35,7 +35,7 @@ import Accounts from "./components/Accounts"
 import SystemSetup from "./components/SystemSetup"
 
 import { AppData, User } from "./types"
-import { loadData, saveData } from "./lib/storage"
+import { loadData, saveData, clearData } from "./lib/storage"
 import { loadUser, clearAuth, getToken } from "./lib/authStorage"
 import { api } from "./lib/api"
 import { fetchAppData } from "./lib/loadAppData"
@@ -62,25 +62,33 @@ const SidebarItem: React.FC<{
 )
 
 const App: React.FC = () => {
-  const [currentUser, setCurrentUser] = useState<User | null>(loadUser())
-  const [data, setData] = useState<AppData>(loadData())
+  const initialUser = loadUser()
+  const [currentUser, setCurrentUser] = useState<User | null>(initialUser)
+  const [data, setData] = useState<AppData>(loadData(initialUser?.id))
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [isSigningUp, setIsSigningUp] = useState(false)
   const [loading, setLoading] = useState(false)
 
   // Carregar dados do backend quando usuário está logado
   useEffect(() => {
+    if (currentUser) {
+      setData(loadData(currentUser.id))
+    }
+
     if (currentUser && getToken()) {
       loadAppDataFromBackend()
     }
   }, [currentUser])
 
   const loadAppDataFromBackend = async () => {
+    const userId = currentUser?.id
+    if (!userId) return
+
     try {
       setLoading(true)
       const appData = await fetchAppData()
       setData(appData)
-      saveData(appData) // Salvar apenas como cache local
+      saveData(appData, userId) // Salvar apenas como cache local
     } catch (err) {
       console.error("Erro ao carregar dados:", err)
       // Fallback para dados locais
@@ -91,19 +99,26 @@ const App: React.FC = () => {
 
   // Função para recarregar dados após operações no backend
   const reloadData = async () => {
+    const userId = currentUser?.id
+    if (!userId) return
+
     try {
       const appData = await fetchAppData()
       setData(appData)
-      saveData(appData)
+      saveData(appData, userId)
     } catch (err) {
       console.error("Erro ao recarregar dados:", err)
     }
   }
 
   const updateData = (newData: Partial<AppData>) => {
+    const userId = currentUser?.id
+
     setData(prev => {
       const updated = { ...prev, ...newData }
-      saveData(updated) // Cache local apenas
+      if (userId) {
+        saveData(updated, userId) // Cache local apenas
+      }
       return updated
     })
   }
@@ -111,41 +126,49 @@ const App: React.FC = () => {
   const handleLogin = (user: User) => {
     setCurrentUser(user)
     setIsSigningUp(false)
-    setData(prev => ({
-      ...prev,
-      isConfigured: true,
-      users: [user],
-    }))
+    setData(loadData(user.id))
   }
 
   const handleSignup = (user: User) => {
+    clearData(user.id)
     setCurrentUser(user)
     setIsSigningUp(false)
-    setData(prev => ({
-      ...prev,
-      isConfigured: true,
+    const freshData: AppData = {
       users: [user],
       accounts: [],
       transactions: [],
       bills: [],
       closings: [],
-    }))
+      missionTarget: 0,
+      missionProjects: [],
+      missionCampaigns: [],
+      missionIncomes: [],
+      isConfigured: true,
+    }
+
+    setData(freshData)
+    saveData(freshData, user.id)
   }
 
   const handleLogout = () => {
+    // Remove only old global cache key from previous versions.
+    clearData()
     clearAuth()
     setCurrentUser(null)
     setData(loadData())
   }
 
   const handleSetupComplete = (setupData: Partial<AppData>) => {
+    const userId = currentUser?.id
     const newData = {
       ...data,
       ...setupData,
       isConfigured: true,
     }
     setData(newData)
-    saveData(newData)
+    if (userId) {
+      saveData(newData, userId)
+    }
   }
 
   // Tela de login/signup

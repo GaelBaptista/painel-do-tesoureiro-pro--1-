@@ -68,11 +68,7 @@ export async function fetchAppData(): Promise<AppData> {
     bills,
     closings,
     missionTarget: settings.missionTarget || 2000,
-    missionProjects: settings.missionProjects || [
-      { name: "EBF", value: 500 },
-      { name: "Missões Mundiais", value: 800 },
-      { name: "Ação Social Local", value: 600 },
-    ],
+    missionProjects: settings.missionProjects || [],
     missionCampaigns: safeCampaigns,
     missionIncomes: safeIncomes,
     missionProgress,
